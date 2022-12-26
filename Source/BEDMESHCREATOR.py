@@ -20,6 +20,7 @@ width = len(inputDat)-1
 depth = len(inputDat[0])-1
 
 subDepth = 20
+divDepth = subDepth+1
 
 xInterps = [[] for i in range(width+1)]
 yInterps = [[] for i in range(depth+1)]
@@ -54,7 +55,7 @@ def bilinear_interpolation(x, y, points):
         raise ValueError('points do not form a rectangle')
     if not x1 <= x <= x2 or not y1 <= y <= y2:
         raise ValueError('(x, y) not within the rectangle')
-
+    #returns the value of the position
     return round((q11 * (x2 - x) * (y2 - y) +
             q21 * (x - x1) * (y2 - y) +
             q12 * (x2 - x) * (y - y1) +
@@ -64,10 +65,11 @@ def bilinear_interpolation(x, y, points):
 
 for i in range(1, len(totArray)):
     for j in range(1, len(totArray)):
-        topLeft = (math.floor(i/21)*subDepth, math.floor(j/21)*subDepth, totArray[math.floor(i/21)*subDepth][math.floor(j/21)*subDepth])
-        topRight = (math.floor(i/21)*subDepth + subDepth, math.floor(j/21)*subDepth, totArray[math.floor(i/21)*subDepth + subDepth][math.floor(j/21)*subDepth])
-        botLeft = (math.floor(i/21)*subDepth, math.floor(j/21)*subDepth + subDepth, totArray[math.floor(i/21)*subDepth][ math.floor(j/21)*subDepth + subDepth])
-        botRight = (math.floor(i/21)*subDepth + subDepth, math.floor(j/21)*subDepth + subDepth, totArray[math.floor(i/21)*subDepth + subDepth][math.floor(j/21)*subDepth + subDepth])
+        #Gets the 'coordinates' of the bounding box that each value in the array is in, so that it can be used to bi-linearly interpolate
+        topLeft = (math.floor(i/21)*subDepth, math.floor(j/divDepth)*subDepth, totArray[math.floor(i/divDepth)*subDepth][math.floor(j/divDepth)*subDepth])
+        topRight = (math.floor(i/21)*subDepth + subDepth, math.floor(j/divDepth)*subDepth, totArray[math.floor(i/divDepth)*subDepth + subDepth][math.floor(j/divDepth)*subDepth])
+        botLeft = (math.floor(i/21)*subDepth, math.floor(j/divDepth)*subDepth + subDepth, totArray[math.floor(i/divDepth)*subDepth][ math.floor(j/divDepth)*subDepth + subDepth])
+        botRight = (math.floor(i/21)*subDepth + subDepth, math.floor(j/divDepth)*subDepth + subDepth, totArray[math.floor(i/divDepth)*subDepth + subDepth][math.floor(j/divDepth)*subDepth + subDepth])
         totArray[i][j] = bilinear_interpolation(i, j, [topLeft, topRight, botLeft, botRight])
 
 
