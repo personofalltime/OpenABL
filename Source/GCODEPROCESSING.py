@@ -21,7 +21,7 @@ def findY(line):
             return i
     return -1
 
-lookupArr = np.ones((220, 220), like=None)
+lookupArr = np.zeros((220, 220))
 
 f = open("example.gcode", 'r')
 
@@ -37,54 +37,49 @@ variable=""
 initial = False
 
 for line in lines:
-    cont+=1
-    if(cont == 4 and initial == False):
-            lineys= line.split(" ")
-            curZ = lineys[-1]
-            intial = True
-   
     if(line == ";MESH:NONMESH\n" or line[0:5] == ";TYPE"):
-        liney = lines[cont].split(" ")
+        liney = lines[cont+1].split(" ")
         tmp2Z = liney[-1]
-        print(liney[-1])
         if(tmp2Z[0] == "Z"):
             curZ = tmp2Z[1:-1]
         count += 1
-        replaced.append(line)
-
-    if(line[0:2] == "G1" or line[0:2] == "G0"):
+        initial = True
+    else:
         line = line.replace("\n", "")
-        line = line[0:line.find(";")]
+        if(line.find(";") != -1):
+            line = line[0:line.find(";")]
+        else:
+            line = line
+        cont+=1
+
+    if(cont == 4 and initial == False):
+        lineys= line.split(" ")
+        curZ = lineys[-1]
+        initial = True
+    
+    if(line[0] == "G" and (line[1] == "1" or line[1] == "0")):
         lineLst = line.split(" ")
-        
         try:
             xVal = findX(line)
             yVal = findY(line)
-
             if(xVal != -1 and yVal != -1):
-                
                 x = lineLst[xVal][1:-1]
                 y = lineLst[yVal][1:-1]
-
                 try:
                     x = float(x)
                     y = float(y)
                     tmpZ = findOffset(x, y, lookupArr, curZ)
-                    line = line + " " + "Z" + str(tmpZ) + "\n"
-                    replaced.append(line)
+                    line = line[0:-2]
+                    line = line + " " + "Z" + str(tmpZ) 
                 except ValueError:
                     line +=  "\n"
-                    replaced.append(line)
-
         except IndexError:
             line +=  "\n"
-            replaced.append(line)
-
         else:
             line +=  "\n"
-            replaced.append(line)
-    else:
-        replaced.append(line)
+    if(line[-1] != "\n"):
+        line += "\n"
+    replaced.append(line)
     
     
     
