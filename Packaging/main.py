@@ -3,6 +3,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 import math
+import progressbar
+import time
 
 def findOffset(findX, findY, arr, val):
     offset = arr[int(findX)][int(findY)]
@@ -89,6 +91,21 @@ def prep(x, y, depth):
     out.append(y)
     return out
     
+def bilinear_interpolation(x, y, points):
+        points = sorted(points)               # order points by x, then by y
+        (x1, y1, q11), (_x1, y2, q12), (x2, _y1, q21), (_x2, _y2, q22) = points
+        
+        if x1 != _x1 or x2 != _x2 or y1 != _y1 or y2 != _y2:
+            raise ValueError('points do not form a rectangle')
+        if not x1 <= x <= x2 or not y1 <= y <= y2:
+            raise ValueError('(x, y) not within the rectangle')
+        #returns the value of the position
+        return round((q11 * (x2 - x) * (y2 - y) +
+                q21 * (x - x1) * (y2 - y) +
+                q12 * (x2 - x) * (y - y1) +
+                q22 * (x - x1) * (y - y1)
+            ) / ((x2 - x1) * (y2 - y1) + 0.0), 2)
+
 def process(xInterps, yInterps, inputDat, subDepth, width, depth, divDepth, totArray):
     for i in range(0, depth+1):
         for j in range(0, width):
@@ -110,33 +127,30 @@ def process(xInterps, yInterps, inputDat, subDepth, width, depth, divDepth, totA
             totArray[i][j*subDepth] = yInterps[j][i]
 
 
-    def bilinear_interpolation(x, y, points):
-        points = sorted(points)               # order points by x, then by y
-        (x1, y1, q11), (_x1, y2, q12), (x2, _y1, q21), (_x2, _y2, q22) = points
-        
-        if x1 != _x1 or x2 != _x2 or y1 != _y1 or y2 != _y2:
-            raise ValueError('points do not form a rectangle')
-        if not x1 <= x <= x2 or not y1 <= y <= y2:
-            raise ValueError('(x, y) not within the rectangle')
-        #returns the value of the position
-        return round((q11 * (x2 - x) * (y2 - y) +
-                q21 * (x - x1) * (y2 - y) +
-                q12 * (x2 - x) * (y - y1) +
-                q22 * (x - x1) * (y - y1)
-            ) / ((x2 - x1) * (y2 - y1) + 0.0), 2)
-
-
+    bar = progressbar.ProgressBar().start()
+    total_steps = 484000
+    sub = 2200
+    print("\nProcessing beginning..... \n")
     for i in range(1, len(totArray)):
         for j in range(1, len(totArray)):
             #Gets the 'coordinates' of the bounding box that each value in the array is in, so that it can be used to bi-linearly interpolate
-            topLeft = (math.floor(i/21)*subDepth, math.floor(j/divDepth)*subDepth, totArray[math.floor(i/divDepth)*subDepth][math.floor(j/divDepth)*subDepth])
-            topRight = (math.floor(i/21)*subDepth + subDepth, math.floor(j/divDepth)*subDepth, totArray[math.floor(i/divDepth)*subDepth + subDepth][math.floor(j/divDepth)*subDepth])
-            botLeft = (math.floor(i/21)*subDepth, math.floor(j/divDepth)*subDepth + subDepth, totArray[math.floor(i/divDepth)*subDepth][ math.floor(j/divDepth)*subDepth + subDepth])
-            botRight = (math.floor(i/21)*subDepth + subDepth, math.floor(j/divDepth)*subDepth + subDepth, totArray[math.floor(i/divDepth)*subDepth + subDepth][math.floor(j/divDepth)*subDepth + subDepth])
+            topLeft = (math.floor(i/divDepth)*subDepth, math.floor(j/divDepth)*subDepth, totArray[math.floor(i/divDepth)*subDepth][math.floor(j/divDepth)*subDepth])
+            topRight = (math.floor(i/divDepth)*subDepth + subDepth, math.floor(j/divDepth)*subDepth, totArray[math.floor(i/divDepth)*subDepth + subDepth][math.floor(j/divDepth)*subDepth])
+            botLeft = (math.floor(i/divDepth)*subDepth, math.floor(j/divDepth)*subDepth + subDepth, totArray[math.floor(i/divDepth)*subDepth][ math.floor(j/divDepth)*subDepth + subDepth])
+            botRight = (math.floor(i/divDepth)*subDepth + subDepth, math.floor(j/divDepth)*subDepth + subDepth, totArray[math.floor(i/divDepth)*subDepth + subDepth][math.floor(j/divDepth)*subDepth + subDepth])
             totArray[i][j] = bilinear_interpolation(i, j, [topLeft, topRight, botLeft, botRight])
+            bar.update((j+(sub*(i-1)))/total_steps)
+    bar.finish()
+    print("\nProcessing complete! \n")
 
     z = np.asarray(totArray)
     return z
+
+print("\nWelcome to the Desktop Automatic Bed Levelling  tool")
+time.sleep(1)
+name = input("\nPlease enter the desired GCode file's name (including extension): \t")
+
+inp = input("Would you like a 3D OR 2D representation of the bed? ('3' & '2' respectively)")
 
 inputDat = [[0 for x in range(3)] for y in range(3)]
 
@@ -151,8 +165,8 @@ for i in range(0, len(lines)):
 width = len(inputDat)-1
 depth = len(inputDat[0])-1
 
-subDepth = 20
-divDepth = subDepth+1
+subDepth = 1100 #Ender 3 build volume (base) divided by two - adjust this as you need
+divDepth = subDepth+1 #To set the quadrants for the array
 
 xInterps = [[] for i in range(width+1)]
 yInterps = [[] for i in range(depth+1)]
@@ -164,7 +178,7 @@ x, y = np.meshgrid(range(bed.shape[0]), range(bed.shape[1]))
 
 #VISUAL REPRESENTATION OF PROCESSED DATA, AS 2D HEATMAP OR 3D GRAPH
 
-inp = input("3D OR 2D?")
+
 
 if(inp == "3"):
     rep = True
@@ -175,23 +189,29 @@ if(rep):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     ax.plot_surface(x, y, bed)
-    plt.title('Bed as 3d height map')
+    plt.title('3-Dimensional height map of the printer bed (0,0 is origin)')
     plt.show()
 else:
     plt.figure()
-    plt.title('Bed as 2d heat map')
+    plt.title('2-Dimensional height map of the printer bed (top left is origin)')
     p = plt.imshow(bed)
     plt.colorbar(p)
     plt.show()
 
 
-lookupArr = np.zeros((220, 220))
-f = open("example.gcode", 'r')
-lines = f.readlines()
-print("started")
-replaced = processInitial(lines)
-f.close()
-n = open("new.gcode", 'w')
-n.write("".join(replaced))
-n.close()
-print("Done")
+lookupArr = bed
+try:
+    f = open(name, 'r')
+    lines = f.readlines()
+    replaced = processInitial(lines)
+    f.close()
+    n = open(name, 'w')
+    n.write("".join(replaced))
+    n.close()
+except:
+    print("Could not read/write to file - please check filename, and try again")
+
+print("Gcode manipulation completed - Modified file saved as " + name + "\n")
+time.sleep(1)
+print("Program shutting down...")
+time.sleep(10)
