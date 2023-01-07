@@ -5,6 +5,7 @@ import numpy as np
 import math
 import progressbar
 import time
+import regex as re
 
 def findOffset(findX, findY, arr, val):
     offset = arr[int(findX)][int(findY)]
@@ -36,12 +37,13 @@ def processInitial(lines):
     initial = False
 
     for line in lines:
-        if(line == ";MESH:NONMESH\n" or line[0:5] == ";TYPE"):
+        if(line == ";MESH:NONMESH\n"):
+
             liney = lines[cont+1].split(" ")
             tmp2Z = liney[-1]
             if(tmp2Z[0] == "Z"):
                 curZ = tmp2Z[1:-1]
-            count += 1
+            print(curZ)
             initial = True
         else:
             line = line.replace("\n", "")
@@ -49,35 +51,36 @@ def processInitial(lines):
                 line = line[0:line.find(";")]
             else:
                 line = line
-            cont+=1
 
         if(cont == 4 and initial == False):
             lineys= line.split(" ")
             curZ = lineys[-1]
             initial = True
         
-        if(line[0] == "G" and (line[1] == "1" or line[1] == "0")):
-            lineLst = line.split(" ")
-            try:
-                xVal = findX(line)
-                yVal = findY(line)
-                if(xVal != -1 and yVal != -1):
-                    x = lineLst[xVal][1:-1]
-                    y = lineLst[yVal][1:-1]
-                    try:
-                        x = float(x)
-                        y = float(y)
-                        tmpZ = findOffset(x, y, lookupArr, curZ)
-                        line = line[0:-2]
-                        line = line + " " + "Z" + str(tmpZ) 
-                    except ValueError:
-                        line +=  "\n"
-            except IndexError:
-                line +=  "\n"
-            else:
-                line +=  "\n"
-        if(line[-1] != "\n"):
-            line += "\n"
+        if(len(line) > 0):
+            if(line[0] == "G" and (line[1] == "1" or line[1] == "0")):
+                lineLst = line.split(" ")
+                try:
+                    xVal = findX(line)
+                    yVal = findY(line)
+                    if(xVal != -1 and yVal != -1):
+                        x = lineLst[xVal][1:-1]
+                        y = lineLst[yVal][1:-1]
+                        try:
+                            x = float(x)
+                            y = float(y)
+                            tmpZ = findOffset(x, y, lookupArr, curZ)
+                            line = line[0:-2]
+                            line = line + " " + "Z" + str(tmpZ) 
+                        except ValueError:
+                            line +=  "\n"
+                except IndexError:
+                    line +=  "\n"
+                else:
+                    line +=  "\n"
+            if(line[-1] != "\n"):
+                line += "\n"
+        cont+=1
         replaced.append(line)
     
     return replaced
@@ -127,10 +130,10 @@ def process(xInterps, yInterps, inputDat, subDepth, width, depth, divDepth, totA
             totArray[i][j*subDepth] = yInterps[j][i]
 
 
-    bar = progressbar.ProgressBar().start()
     total_steps = 484000
     sub = 2200
     print("\nProcessing beginning..... \n")
+    bar = progressbar.ProgressBar().start()
     for i in range(1, len(totArray)):
         for j in range(1, len(totArray)):
             #Gets the 'coordinates' of the bounding box that each value in the array is in, so that it can be used to bi-linearly interpolate
@@ -159,7 +162,9 @@ file = open("input.dat", 'r')
 lines = file.readlines()
 
 for i in range(0, len(lines)):
-    inputDat[math.floor(i/3)][i%3] = int(lines[i])
+    lines[i] = lines[i][0:lines[i].find("\n")]
+    
+    inputDat[math.floor(i/3)][i%3] = float(lines[i])
 
 
 width = len(inputDat)-1
@@ -177,7 +182,6 @@ bed = process(xInterps, yInterps, inputDat, subDepth, width, depth, divDepth, to
 x, y = np.meshgrid(range(bed.shape[0]), range(bed.shape[1]))
 
 #VISUAL REPRESENTATION OF PROCESSED DATA, AS 2D HEATMAP OR 3D GRAPH
-
 
 
 if(inp == "3"):
@@ -198,20 +202,17 @@ else:
     plt.colorbar(p)
     plt.show()
 
-
 lookupArr = bed
-try:
-    f = open(name, 'r')
-    lines = f.readlines()
-    replaced = processInitial(lines)
-    f.close()
-    n = open(name, 'w')
-    n.write("".join(replaced))
-    n.close()
-except:
-    print("Could not read/write to file - please check filename, and try again")
-
+f = open(name, 'r')
+lines = f.readlines()
+replaced = processInitial(lines)
+f.close()
+print("Writing to file....")
+n = open("new.gcode", 'w')
+n.write("".join(replaced))
+n.close()
 print("Gcode manipulation completed - Modified file saved as " + name + "\n")
+
 time.sleep(1)
 print("Program shutting down...")
 time.sleep(10)

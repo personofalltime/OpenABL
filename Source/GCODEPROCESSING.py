@@ -23,7 +23,7 @@ def findY(line):
 
 lookupArr = np.zeros((220, 220))
 
-f = open("example.gcode", 'r')
+f = open("rock.gcode", 'r')
 
 lines = f.readlines()
 
@@ -43,6 +43,7 @@ for line in lines:
         if(tmp2Z[0] == "Z"):
             curZ = tmp2Z[1:-1]
         count += 1
+        print(curZ)
         initial = True
     else:
         line = line.replace("\n", "")
@@ -51,34 +52,33 @@ for line in lines:
         else:
             line = line
         cont+=1
-
-    if(cont == 4 and initial == False):
-        lineys= line.split(" ")
-        curZ = lineys[-1]
-        initial = True
-    
-    if(line[0] == "G" and (line[1] == "1" or line[1] == "0")):
-        lineLst = line.split(" ")
-        try:
-            xVal = findX(line)
-            yVal = findY(line)
-            if(xVal != -1 and yVal != -1):
-                x = lineLst[xVal][1:-1]
-                y = lineLst[yVal][1:-1]
-                try:
-                    x = float(x)
-                    y = float(y)
-                    tmpZ = findOffset(x, y, lookupArr, curZ)
-                    line = line[0:-2]
-                    line = line + " " + "Z" + str(tmpZ) 
-                except ValueError:
-                    line +=  "\n"
-        except IndexError:
-            line +=  "\n"
-        else:
-            line +=  "\n"
-    if(line[-1] != "\n"):
-        line += "\n"
+    if(len(line) > 0):
+        if(cont == 4 and initial == False):
+            lineys= line.split(" ")
+            curZ = lineys[-1]
+            initial = True
+        if(line[0] == "G" and (line[1] == "1" or line[1] == "0")):
+            lineLst = line.split(" ")
+            try:
+                xVal = findX(line)
+                yVal = findY(line)
+                if(xVal != -1 and yVal != -1):
+                    x = lineLst[xVal][1:-1]
+                    y = lineLst[yVal][1:-1]
+                    try:
+                        x = float(x)
+                        y = float(y)
+                        tmpZ = findOffset(x, y, lookupArr, curZ)
+                        line = line[0:-2]
+                        line = line + " " + "Z" + str(tmpZ) 
+                    except ValueError:
+                        line +=  "\n"
+            except IndexError:
+                line +=  "\n"
+            else:
+                line +=  "\n"
+        if(line[-1] != "\n"):
+            line += "\n"
     replaced.append(line)
     
     
