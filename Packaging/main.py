@@ -160,10 +160,11 @@ inputDat = [[0 for x in range(3)] for y in range(3)]
 file = open("input.dat", 'r')
 
 lines = file.readlines()
-
+print(len(lines))
 for i in range(0, len(lines)):
-    lines[i] = lines[i][0:lines[i].find("\n")]
-    
+    if(lines[i].find("\n") != -1):
+        lines[i] = lines[i][0:lines[i].find("\n")]
+    lines[i] = float(lines[i])
     inputDat[math.floor(i/3)][i%3] = float(lines[i])
 
 
@@ -216,3 +217,5 @@ print("Gcode manipulation completed - Modified file saved as " + name + "\n")
 time.sleep(1)
 print("Program shutting down...")
 time.sleep(10)
+
+
