@@ -1,4 +1,4 @@
-**Details about the parts needed are below: **
+**Details about the parts needed are below:**
 
 Here are the 3 printed components needed for this to work:
 - The main arduino housing: https://thangs.com/mythangs/file/698372
