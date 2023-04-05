@@ -3,6 +3,12 @@ import busio
 import Adafruit_ADS1x15
 import os
 
+def stringify(inp):
+    string = ""
+    for i in range(0, len(inp)):
+        string+=str(inp[i])
+    return string
+
 i2c = busio.I2C(board.SCL, board.SDA)
 adc = Adafruit_ADS1x15.ADS1115()
 
@@ -34,5 +40,11 @@ with open("/home/pi/printer_data/config/printer.cfg") as cfg:
 
         val = int(lines.index(find))
         
-        newval = lines[0:val+1] + vals + lines [val+8:-1]
+        newval = lines[0:val+1] 
+        newval.append(stringify(vals[0]))
+        newval.append(stringify(vals[1]))
+        newval.append(stringify(vals[2]))
+        newval += lines [val+8:-1]
 
+cfg = open("/home/pi/printer_data/config/printer.cfg", "w")
+cfg.writelines(newval)
