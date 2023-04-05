@@ -1,3 +1,3 @@
 import os
 
-os.system("echo G0 Z2 >> /tmp/printer")
+os.system("echo G0 Z100 >> /tmp/printer")
