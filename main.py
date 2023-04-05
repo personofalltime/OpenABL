@@ -21,7 +21,7 @@ for i in range(0, 3):
         vals[i][j]  = adc.read_adc(0)
 
 
-with open("printer_data/config/printer.cfg") as cfg:
+with open("/home/pi/printer_data/config/printer.cfg") as cfg:
 
     lines = cfg.readlines()
 
