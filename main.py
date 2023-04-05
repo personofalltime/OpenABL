@@ -4,7 +4,7 @@ import Adafruit_ADS1x15
 import os
 
 def stringify(inp):
-    string = ""
+    string = "\t"
     for i in range(0, len(inp)):
         string+=str(inp[i])+", "
     return string
