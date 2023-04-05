@@ -41,12 +41,9 @@ with open("/home/pi/printer_data/config/printer.cfg") as cfg:
         val = int(lines.index(find))
         list = ["hi"]
         newval = lines[0:val+1] 
-        list[0] = stringify(vals[0])
-        newval.append(list)
-        list[0] = stringify(vals[1])
-        newval.append(list)
-        list[0] = stringify(vals[2])
-        newval.append(list)
+        newval.append(stringify(vals[0]) + "\n")
+        newval.append(stringify(vals[1]) + "\n")
+        newval.append(stringify(vals[2]) + "\n")
         newval += lines [val+8:-1]
 
 cfg = open("/home/pi/printer_data/config/printer.cfg", "w")
