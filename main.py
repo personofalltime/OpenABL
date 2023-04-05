@@ -6,7 +6,7 @@ import os
 def stringify(inp):
     string = ""
     for i in range(0, len(inp)):
-        string+=str(inp[i])
+        string+=str(inp[i])+", "
     return string
 
 i2c = busio.I2C(board.SCL, board.SDA)
