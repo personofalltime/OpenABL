@@ -18,7 +18,7 @@ vals = [[0 for j in range(3)] for i in range(3)]
 for i in range(0, 3):
     for j in range(0, 3):
         os.system("echo G0 X" + str(x_vals[i]) + " Y" + str(y_vals[j]) + ">> /tmp/printer")
-        vals[i][j]  = adc.read_adc()
+        vals[i][j]  = adc.read_adc(0)
 
 
 with open("/printer_data/config/printer.cfg") as cfg:

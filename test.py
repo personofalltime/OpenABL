@@ -1,6 +1,6 @@
 import board
 import busio
-from Adafruit_ADS1x15 import ADS1x15
+import Adafruit_ADS1x15 
 import os
 
 
@@ -10,7 +10,7 @@ adc = Adafruit_ADS1x15.ADS1115()
 
 
 
-print(adc.read_adc())
+print(adc.read_adc(0))
 
 print("loading \n\n\n\n")
 
