@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "Bed Levelling",
+			"path": "../../../Documents/PlatformIO/Projects/Bed Levelling"
+		}
+	],
+	"settings": {}
+}
