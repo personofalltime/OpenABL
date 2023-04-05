@@ -7,11 +7,11 @@ import os
 
 
 i2c = busio.I2C(board.SCL, board.SDA)
-ads = ADS.ADS1115(i2c)
+adc = Adafruit_ADS1x15.ADS1115()
 
-chan = AnalogIn(ads, ADS.P0)
 
-print(ads.read_adc())
+
+print(adc.read_adc())
 
 print("loading \n\n\n\n")
 
