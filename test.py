@@ -1,14 +1,8 @@
 import board
 import busio
+import adafruit_ads1x15.ads1115 as ADS
+from adafruit_ads1x15.analog_in import AnalogIn
 import os
-from ADS1115 import ADS1115
-
-
-ads1115 = ADS1115()
-while True :
-    ads1115.set_channel()
-    ads1115.config_single_ended()
-    time.sleep(0.1)
 
 
 
@@ -17,9 +11,9 @@ ads = ADS.ADS1115(i2c)
 
 chan = AnalogIn(ads, ADS.P0)
 
-print(ads1115.read_adc())
+print(ads.read_adc())
 
 print("loading \n\n\n\n")
 
 file = open("/printer_data/config/printer.cfg")
-print(file.readlines())
+print(file.readlines)
