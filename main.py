@@ -3,9 +3,12 @@ import busio
 import Adafruit_ADS1x15
 import os
 import moonrakerpy as moonpy
+import time
 
 
 printer = moonpy.MoonrakerPrinter("http://192.168.1.226")
+
+printer.send_gcode("G28")
 
 def stringify(inp):
     string = "\t"
@@ -20,7 +23,7 @@ found = False
 count = 0
 find = -1
 
-x_vals = [30, 140, 230]
+x_vals = [30, 130, 230]
 y_vals = [40, 150, 235]
 
 vals = [[0 for j in range(3)] for i in range(3)]
@@ -29,7 +32,13 @@ for i in range(0, 3):
     for j in range(0, 3):
         gcode = "G0 X" + str(x_vals[i]) + " Y" + str(y_vals[j]) + " Z0\n"
         printer.send_gcode(gcode)
-#       vals[i][j]  = adc.read_adc(0)
+#        Temporarily commented out to allow for testing while setting up hardware
+#        time.sleep(0.1)
+#        distance = adc.read_adc(0)
+#        time.sleep(0.1)
+#        distance *= (5.0/8191);
+#        distance = 5.2819 * pow(distance , -1.161);
+#        vals[i][j] = distance*10;
         vals[i][j] = 0.0
 
 
