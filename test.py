@@ -1,3 +1,5 @@
-import os
+import moonrakerpy as moonpy
 
-os.system("echo G0 Z100 >> /tmp/printer")
+printer = moonpy.MoonrakerPrinter('http://192.168.1.226')
+
+printer.send_gcode("G28")
