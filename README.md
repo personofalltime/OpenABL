@@ -1,6 +1,6 @@
-# Bed-Levelling
+# OpenABL
 # [DEVELOPMENT ONGOING]
-An open-source bed-levelling program, that can be used with cheap and commonly-available hardware to level any printer (only tested on MARLIN firmware)
+An open-source automatic bed-levelling program, that can be used with cheap and commonly-available hardware to level any printer (only tested on MARLIN firmware)
 
 # HARDWARE LIST:
 - Arduino Uno (Or any other arduino - just make sure to change the 'chipselect' variable to suit the type of board)
